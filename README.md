@@ -1,1 +1,1 @@
-# python_study_notes
+# python study notes
