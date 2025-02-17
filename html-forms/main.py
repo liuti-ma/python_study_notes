@@ -1,18 +1,26 @@
-import requests
-from flask import Flask, render_template
-from flask import request
 import smtplib
 
+import requests
+
+from flask import request
+
 from flask_wtf import FlaskForm
-from wtforms.fields import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email
+#from flask_bootstrap import Bootstrap5  # pip install bootstrap-flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
+app.secret_key = "some secret string"
+#bootstrap = Bootstrap5(app)
 
 my_email = "pythonstudytian@gmail.com"
 password = "vhuhyfewasurzrpv"
 
+
 posts = requests.get(url="https://api.npoint.io/c790b4d5cab58020d391",verify=False).json()
+
+
 @app.route('/')
 def get_all_posts():
     return render_template("index.html", all_posts=posts)
@@ -58,16 +66,16 @@ class loginForm(FlaskForm):
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField(label="Log In")
-    app.secret_key = "some secret string"
+
 
 @app.route("/login", methods=["GET","POST"])
 def login():
     form = loginForm()
     if form.validate_on_submit():
        if form.email.data == "admin@email.com" and form.password.data=="12345678":
-           return render_template("login.html")
-
-
+            return render_template("success.html")
+       else:
+           return render_template("denied.html")
     return render_template("login.html", form=form)
 
 

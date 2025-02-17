@@ -22,9 +22,41 @@ https://www.jetbrains.com/help/pycharm/installation-guide.html?keymap=secondary_
 
 
 
-html-forms:
-Build a blog web site with Flask application, POST requests and HTML forms 
-send mail with SMTP
+### **html-forms**:
+This tutorial guides you through building a blog website using Flask, a lightweight Python web framework. You'll learn how to handle POST requests, work with HTML forms, send emails using SMTP, validate and process form data with WTForms, and create reusable templates with Jinja2.
+
+Features
+Flask Application: Set up a basic Flask web application.
+
+HTML Forms: Create and handle forms for user input.
+
+POST Requests: Process form submissions using POST requests.
+
+SMTP Email Integration: Send emails using Python's smtplib.
+
+WTForms: Validate and manage form data securely.
+
+Jinja2 Templates: Use template inheritance to create reusable and modular HTML templates.
+
+By following this tutorial, you've built a simple blog website with Flask, HTML forms, and email functionality. You've also learned how to use WTForms for validation and Jinja2 for template inheritance. Feel free to expand this project by adding a database, user authentication, or more advanced features!
+
+Credentials
+Email: admin@email.com
+Password: 12345678
+
+Prerequisites
+Before starting, ensure you have the following installed:
+
+Python 3.x
+
+Flask (pip install Flask)
+
+WTForms (pip install WTForms)
+
+Flask-WTF (pip install Flask-WTF)
+
+An email account for SMTP (e.g., Gmail)
+
 
 Disclaimer
 This project (including but not limited to code, documentation, examples, etc.) is provided for educational and reference purposes only. The author makes no explicit or implied guarantees regarding the accuracy, completeness, or suitability of the project. Any risks arising from the use of this project are borne solely by the user.
