@@ -16,7 +16,7 @@ pip3 install -r requirements.txt
 
 This will install the packages from requirements.txt for this project.
 '''
-
+DElETE_API_KEY = "thisisakeyfordelete"
 app = Flask(__name__)
 
 # CREATE DB
@@ -92,11 +92,57 @@ def search_cafes():
 # HTTP GET - Read Record
 
 # HTTP POST - Create Record
+@app.route("/add",methods=["POST"])
+def add_cafe():
+    new_cafe = Cafe(
+        name=request.form.get("name"),
+        map_url=request.form.get("map_url"),
+        img_url=request.form.get("img_url"),
+        location=request.form.get("loc"),
+        has_sockets=bool(request.form.get("sockets")),
+        has_toilet=bool(request.form.get("toilet")),
+        has_wifi=bool(request.form.get("wifi")),
+        can_take_calls=bool(request.form.get("calls")),
+        seats=request.form.get("seats"),
+        coffee_price=request.form.get("coffee_price"),
+    )
+    print(new_cafe.to_dict())
+    db.session.add(new_cafe)
+    db.session.commit()
+
+    return jsonify(response={"success": "Successfully added the new cafe."})
 
 # HTTP PUT/PATCH - Update Record
+@app.route("/update_price/<int:cafe_id>",methods=["PATCH"])
+def update_price(cafe_id):
+    cafe=db.get_or_404(Cafe, cafe_id)
+    if cafe:
+        cafe.coffee_price = request.args.get("new_price")
+        db.session.add(cafe)
+        db.session.commit()
+        return jsonify(response={"success": "Successfully updated the price."}), 200
+    else:
+        # 404 = Resource not found
+        return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."}), 404
 
 # HTTP DELETE - Delete Record
+# HTTP PUT/PATCH - Update Record
+@app.route("/report_closed/<int:cafe_id>",methods=["DELETE"])
+def delete_cafe(cafe_id):
+    cafe=db.get_or_404(Cafe, cafe_id)
+    if cafe:
+        api_key = request.args.get("api_key")
+        if api_key == DElETE_API_KEY:
+            db.session.delete(cafe)
+            db.session.commit()
+            return jsonify(response={"success": "Successfully delete the cafe."}), 200
+        else:
+            return jsonify(error={"Forbidden": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
+    else:
+        # 404 = Resource not found
+        return jsonify(response={"Failed": "Cafe does not exist."}), 304
 
+# HTTP DELETE - Delete Record
 
 if __name__ == '__main__':
     app.run(debug=True)
