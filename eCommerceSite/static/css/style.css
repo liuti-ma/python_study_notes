@@ -1,0 +1,16 @@
+/* Payment form styling */
+#payment-element {
+    border: 1px solid #ced4da;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+/* Login card styling */
+.card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: none;
+}
