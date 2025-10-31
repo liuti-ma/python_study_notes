@@ -169,6 +169,14 @@
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
         }
         
         .chart-card h2 {
@@ -184,6 +192,168 @@
             position: relative;
             height: 300px;
             width: 100%;
+        }
+        
+        .chart-card.zoomed {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 90vw;
+            height: 90vh;
+            z-index: 1000;
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.8);
+            cursor: default;
+            padding: 30px;
+        }
+        
+        .chart-card.zoomed .chart-container {
+            height: calc(100% - 60px);
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+        
+        .prod-color {
+            background-color: #4e73df;
+        }
+        
+        .non-prod-color {
+            background-color: #1cc88a;
+        }
+        
+        .avg-color {
+            background-color: #e74a3b;
+        }
+        
+        .traceroute-color {
+            background-color: #f6c23e;
+        }
+        
+        .zoom-instruction {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6c757d;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .chart-card:hover .zoom-instruction {
+            opacity: 1;
+        }
+        
+        .chart-card.zoomed .zoom-instruction {
+            display: none;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            z-index: 1001;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        
+        .chart-card.zoomed .close-btn {
+            display: block;
+        }
+        
+        /* Traceroute specific styles */
+        #tracerouteChartCard {
+            position: relative;
+        }
+        
+        .frosted-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: all 0.5s ease;
+        }
+        
+        #tracerouteChartCard.active .frosted-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .activate-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 11;
+        }
+        
+        .activate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        .activate-info {
+            margin-top: 15px;
+            text-align: center;
+            color: #6c757d;
+            max-width: 80%;
+        }
+        
+        .traceroute-content {
+            transition: filter 0.5s ease;
+        }
+        
+        #tracerouteChartCard:not(.active) .traceroute-content {
+            filter: blur(5px);
         }
         
         .filters {
@@ -515,24 +685,91 @@
             </div>
             
             <section class="charts-section">
-                <div class="chart-card">
-                    <h2><i class="fas fa-chart-bar"></i> Projects Processed</h2>
+                <div class="chart-card" id="projectsChartCard">
+                    <button class="close-btn">&times;</button>
+                    <h2><i class="fas fa-chart-bar"></i> Number of Projects (Past 12 Months)</h2>
                     <div class="chart-container">
-                        <canvas id="usersChart"></canvas>
+                        <canvas id="projectsChart"></canvas>
                     </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color prod-color"></div>
+                            <span>Production</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color non-prod-color"></div>
+                            <span>Non-Production</span>
+                        </div>
+                    </div>
+                    <div class="zoom-instruction">Click to zoom</div>
                 </div>
                 
-                <div class="chart-card">
-                    <h2><i class="fas fa-chart-pie"></i> Projects run duration</h2>
+                <div class="chart-card" id="durationChartCard">
+                    <button class="close-btn">&times;</button>
+                    <h2><i class="fas fa-chart-pie"></i> Run Duration (Past 12 Months)</h2>
                     <div class="chart-container">
-                        <canvas id="environmentChart"></canvas>
+                        <canvas id="durationChart"></canvas>
                     </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color prod-color"></div>
+                            <span>Production</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color non-prod-color"></div>
+                            <span>Non-Production</span>
+                        </div>
+                    </div>
+                    <div class="zoom-instruction">Click to zoom</div>
                 </div>
                 
-                <div class="chart-card">
-                    <h2><i class="fas fa-chart-line"></i> Projects volume</h2>
+                <div class="chart-card" id="avgDurationChartCard">
+                    <button class="close-btn">&times;</button>
+                    <h2><i class="fas fa-chart-line"></i> Average Run Time (Past 12 Months)</h2>
                     <div class="chart-container">
-                        <canvas id="trendsChart"></canvas>
+                        <canvas id="avgDurationChart"></canvas>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color prod-color"></div>
+                            <span>Production</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color non-prod-color"></div>
+                            <span>Non-Production</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color avg-color"></div>
+                            <span>Overall Average</span>
+                        </div>
+                    </div>
+                    <div class="zoom-instruction">Click to zoom</div>
+                </div>
+                
+                <div class="chart-card" id="tracerouteChartCard">
+                    <button class="close-btn">&times;</button>
+                    
+                    <!-- Frosted glass overlay with activation button -->
+                    <div class="frosted-overlay">
+                        <button class="activate-btn" id="activateTraceroute">Show Traceroute Analysis</button>
+                        <div class="activate-info">
+                            <p>Click to reveal network performance analysis</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Traceroute chart content -->
+                    <div class="traceroute-content">
+                        <h2><i class="fas fa-network-wired"></i> Network Traceroute Analysis</h2>
+                        <div class="chart-container">
+                            <canvas id="tracerouteChart"></canvas>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color traceroute-color"></div>
+                                <span>Response Time (ms)</span>
+                            </div>
+                        </div>
+                        <div class="zoom-instruction">Click to zoom</div>
                     </div>
                 </div>
             </section>
@@ -769,62 +1006,6 @@
 
     <script>
         // Toggle summary section
-const Utils = {
-      months: ({count}) => Array.from({length: count}, (_, i) => `Month ${i + 1}`),
-      numbers: ({count, min, max}) => Array.from({length: count}, () => Math.floor(Math.random() * (max - min + 1) + min)),
-      rand: (min, max) => Math.floor(Math.random() * (max - min + 1) + min),
-      CHART_COLORS: {
-        red: 'rgb(255, 99, 132)',
-        blue: 'rgb(54, 162, 235)',
-        green: 'rgb(75, 192, 192)',
-        orange: 'rgb(255, 159, 64)',
-      },
-      transparentize: (color, opacity) => {
-        const alpha = 1 - opacity;
-        return color.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
-      },
-      namedColor: (index) => {
-        const colors = Object.values(Utils.CHART_COLORS);
-        return colors[index % colors.length];
-      }
-    };
-
-    const DATA_COUNT = 7;
-    const NUMBER_CFG = {count: DATA_COUNT, min: 0, max: 100};
-    const labels = Utils.months({count: 7});
-    const data = {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Production',
-          data: Utils.numbers(NUMBER_CFG),
-          borderColor: Utils.CHART_COLORS.red,
-          backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
-        },
-        {
-          label: 'Non-Production',
-          data: Utils.numbers(NUMBER_CFG),
-          borderColor: Utils.CHART_COLORS.blue,
-          backgroundColor: Utils.transparentize(Utils.CHART_COLORS.blue, 0.5),
-        }
-      ]
-    };
-
-    const config = {
-      type: 'bar',
-      data: data,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'top' },
-          title: {
-            display: false,
-            text: 'Number of Runs'
-          }
-        }
-      },
-    };
-
         document.getElementById('summaryToggle').addEventListener('click', function() {
             const summarySection = document.getElementById('summarySection');
             const toggleIcon = this.querySelector('.toggle-icon');
@@ -839,93 +1020,378 @@ const Utils = {
             }
         });
 
+        // Generate past 12 months labels
+        const months = [];
+        const currentDate = new Date();
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+            months.push(date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+        }
+
+        // Generate random data for demonstration
+        function generateRandomData(min, max, count) {
+            const data = [];
+            for (let i = 0; i < count; i++) {
+                data.push(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return data;
+        }
+
+        // Projects data
+        const prodProjects = generateRandomData(20, 50, 12);
+        const nonProdProjects = generateRandomData(15, 45, 12);
+
+        // Duration data (in hours)
+        const prodDuration = generateRandomData(100, 300, 12);
+        const nonProdDuration = generateRandomData(50, 200, 12);
+        
+        // Calculate average run time data
+        const prodAvgDuration = prodDuration.map((duration, index) => 
+            Math.round(duration / prodProjects[index] * 10) / 10
+        );
+        const nonProdAvgDuration = nonProdDuration.map((duration, index) => 
+            Math.round(duration / nonProdProjects[index] * 10) / 10
+        );
+        const overallAvgDuration = prodDuration.map((duration, index) => 
+            Math.round((duration + nonProdDuration[index]) / (prodProjects[index] + nonProdProjects[index]) * 10) / 10
+        );
+
+        // Traceroute data
+        const tracerouteHops = ['Hop 1', 'Hop 2', 'Hop 3', 'Hop 4', 'Hop 5', 'Hop 6', 'Hop 7', 'Hop 8'];
+        const tracerouteResponseTimes = generateRandomData(5, 150, 8);
+
+        // Chart colors
+        const prodColor = '#4e73df';
+        const nonProdColor = '#1cc88a';
+        const avgColor = '#e74a3b';
+        const tracerouteColor = '#f6c23e';
+
         // Initialize Charts only when needed
         function initializeCharts() {
-            // Top 10 Users by Actions Chart
-            const usersCtx = document.getElementById('usersChart').getContext('2d');
-			const usersChart = new Chart(usersCtx, config);
-            // Actions by Environment Chart
-            const environmentCtx = document.getElementById('environmentChart').getContext('2d');
-            const environmentChart = new Chart(environmentCtx, {
-                type: 'doughnut',
+            // Projects Chart
+            const projectsCtx = document.getElementById('projectsChart').getContext('2d');
+            const projectsChart = new Chart(projectsCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['Production', 'Staging', 'Development'],
-                    datasets: [{
-                        label: 'Actions by Environment',
-                        data: [6845, 3245, 2757],
-                        backgroundColor: [
-                            'rgba(54, 162, 235, 0.7)',
-                            'rgba(255, 205, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgb(54, 162, 235)',
-                            'rgb(255, 205, 86)',
-                            'rgb(75, 192, 192)'
-                        ],
-                        borderWidth: 1
-                    }]
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Production',
+                            data: prodProjects,
+                            backgroundColor: prodColor,
+                            borderColor: prodColor,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Non-Production',
+                            data: nonProdProjects,
+                            backgroundColor: nonProdColor,
+                            borderColor: nonProdColor,
+                            borderWidth: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-            
-            // Daily Activity Trends Chart
-            const trendsCtx = document.getElementById('trendsChart').getContext('2d');
-            const trendsChart = new Chart(trendsCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Jun 9', 'Jun 10', 'Jun 11', 'Jun 12', 'Jun 13', 'Jun 14', 'Jun 15'],
-                    datasets: [{
-                        label: 'Login Actions',
-                        data: [320, 302, 401, 385, 412, 399, 428],
-                        borderColor: 'rgb(54, 162, 235)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }, {
-                        label: 'Data Modifications',
-                        data: [210, 195, 280, 265, 298, 275, 310],
-                        borderColor: 'rgb(255, 99, 132)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }, {
-                        label: 'View Actions',
-                        data: [450, 480, 520, 510, 550, 530, 580],
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    },
                     scales: {
                         y: {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Number of Actions'
+                                text: 'Number of Projects'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+
+            // Duration Chart
+            const durationCtx = document.getElementById('durationChart').getContext('2d');
+            const durationChart = new Chart(durationCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Production',
+                            data: prodDuration,
+                            backgroundColor: prodColor + '20',
+                            borderColor: prodColor,
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Non-Production',
+                            data: nonProdDuration,
+                            backgroundColor: nonProdColor + '20',
+                            borderColor: nonProdColor,
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Run Duration (Hours)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+
+            // Average Duration Chart
+            const avgDurationCtx = document.getElementById('avgDurationChart').getContext('2d');
+            const avgDurationChart = new Chart(avgDurationCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Production',
+                            data: prodAvgDuration,
+                            backgroundColor: prodColor,
+                            borderColor: prodColor,
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Non-Production',
+                            data: nonProdAvgDuration,
+                            backgroundColor: nonProdColor,
+                            borderColor: nonProdColor,
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Overall Average',
+                            data: overallAvgDuration,
+                            backgroundColor: avgColor,
+                            borderColor: avgColor,
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            tension: 0.3,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Average Run Time (Hours)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+
+            // Traceroute Chart
+            const tracerouteCtx = document.getElementById('tracerouteChart').getContext('2d');
+            const tracerouteChart = new Chart(tracerouteCtx, {
+                type: 'radar',
+                data: {
+                    labels: tracerouteHops,
+                    datasets: [
+                        {
+                            label: 'Response Time (ms)',
+                            data: tracerouteResponseTimes,
+                            backgroundColor: tracerouteColor + '40',
+                            borderColor: tracerouteColor,
+                            borderWidth: 2,
+                            pointBackgroundColor: tracerouteColor,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: tracerouteColor
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 200,
+                            ticks: {
+                                stepSize: 40
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Response Time: ${context.raw} ms`;
+                                }
                             }
                         }
                     }
                 }
             });
+
+            // Store chart instances for zoom functionality
+            window.chartInstances = {
+                projectsChart,
+                durationChart,
+                avgDurationChart,
+                tracerouteChart
+            };
         }
+
+        // Traceroute activation functionality
+        const activateTracerouteBtn = document.getElementById('activateTraceroute');
+        const tracerouteChartCard = document.getElementById('tracerouteChartCard');
+        
+        activateTracerouteBtn.addEventListener('click', function() {
+            tracerouteChartCard.classList.add('active');
+            // Resize the chart when it becomes fully visible
+            setTimeout(() => {
+                if (window.chartInstances && window.chartInstances.tracerouteChart) {
+                    window.chartInstances.tracerouteChart.resize();
+                }
+            }, 500);
+        });
+
+        // Zoom functionality
+        const chartCards = document.querySelectorAll('.chart-card');
+        const closeButtons = document.querySelectorAll('.chart-card .close-btn');
+        
+        chartCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Don't zoom if clicking the close button or activation button
+                if (e.target.classList.contains('close-btn') || 
+                    e.target.classList.contains('activate-btn') ||
+                    e.target.closest('.frosted-overlay')) return;
+                
+                // If already zoomed, do nothing
+                if (this.classList.contains('zoomed')) return;
+                
+                // Don't zoom if traceroute chart is not activated
+                if (this.id === 'tracerouteChartCard' && !this.classList.contains('active')) return;
+                
+                // Zoom the chart
+                this.classList.add('zoomed');
+                
+                // Resize the chart
+                const canvas = this.querySelector('canvas');
+                const chart = Chart.getChart(canvas);
+                if (chart) {
+                    chart.resize();
+                }
+            });
+        });
+        
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const card = this.closest('.chart-card');
+                card.classList.remove('zoomed');
+                
+                // Resize the chart back to normal
+                const canvas = card.querySelector('canvas');
+                const chart = Chart.getChart(canvas);
+                if (chart) {
+                    chart.resize();
+                }
+            });
+        });
+        
+        // Close zoomed chart when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.chart-card.zoomed')) {
+                const zoomedCard = document.querySelector('.chart-card.zoomed');
+                if (zoomedCard) {
+                    zoomedCard.classList.remove('zoomed');
+                    
+                    // Resize the chart back to normal
+                    const canvas = zoomedCard.querySelector('canvas');
+                    const chart = Chart.getChart(canvas);
+                    if (chart) {
+                        chart.resize();
+                    }
+                }
+            }
+        });
+        
+        // Close zoomed chart with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const zoomedCard = document.querySelector('.chart-card.zoomed');
+                if (zoomedCard) {
+                    zoomedCard.classList.remove('zoomed');
+                    
+                    // Resize the chart back to normal
+                    const canvas = zoomedCard.querySelector('canvas');
+                    const chart = Chart.getChart(canvas);
+                    if (chart) {
+                        chart.resize();
+                    }
+                }
+            }
+        });
 
         // Sample data for the modal
         const auditData = {
@@ -1068,7 +1534,7 @@ const Utils = {
 
         // Modal functionality
         const modal = document.getElementById('dataModal');
-        const closeBtn = document.querySelector('.close-btn');
+        const closeBtn = document.querySelector('.modal .close-btn');
         const reviewBtns = document.querySelectorAll('.review-btn');
 
         // Open modal when review button is clicked
